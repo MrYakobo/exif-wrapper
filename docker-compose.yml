@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  metadata:
+    container_name: fix_metadata
+    build: .
+    entrypoint: ["/app/fix_metadata.py", "/mnt"]
+    volumes:
+      - ${TAKEOUT_DIR}:/mnt
+      - ./fix_metadata.py:/app/fix_metadata.py
+    env_file:
+      - .env
