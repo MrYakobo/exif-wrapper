@@ -109,7 +109,7 @@ def main(rootdir):
     # Takeout/Google Foto
     # rootdir refers to that subfolder
 
-    rootdir = glob(f"{rootdir}/*/")[0]
+    rootdir = glob(f"{rootdir}/Google*/")[0]
     restructure_folders_if_needed(rootdir)
 
     process_albums(rootdir)
