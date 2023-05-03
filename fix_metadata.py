@@ -69,21 +69,20 @@ def process_photos(rootdir):
 
     run_mattwilson1024_google_photos_exif(albumdir, outdir, errdir)
     
-def _restructure_if_needed(globstr, target_dir):
+def _restructure_if_needed(folders, target_dir):
     if os.path.exists(target_dir) and len(glob(f"{target_dir}/*")) > 0:
         p(f"{target_dir} exists and is non-empty, assuming no further restructuring is needed")
         return
 
     os.makedirs(target_dir, exist_ok=True)
 
-    albums = glob(globstr)
-    if len(albums) == 0:
-        p(f"Warning: {globstr} didn't match anything")
+    if len(folders) == 0:
+        p(f"Warning: no folders were moved to {target_dir}")
 
-    for album in albums:
-        shutil.move(album, target_dir)
+    for folder in folders:
+        shutil.move(folder, target_dir)
 
-    p(f"Restructured {len(albums)} folders")
+    p(f"Restructured {len(folder)} folders")
     
 
 def restructure_folders_if_needed(rootdir):
@@ -97,11 +96,15 @@ def restructure_folders_if_needed(rootdir):
     # $rootdir/Albums/My Album 2
     # $rootdir/Photos/Photos from 2008
 
-    # move the "Photos from $YEAR" directories to Photos/
-    _restructure_if_needed(f"{rootdir}/Photos from */", f"{rootdir}/Photos")
+    photos_dir = f"{rootdir}/Photos/"
 
-    # move the other directories to Albums/
-    _restructure_if_needed(f"{rootdir}/*/", f"{rootdir}/Albums")
+    # move the "Photos from $YEAR" directories to Photos/
+    _restructure_if_needed(glob(f"{rootdir}/Photos from */"), photos_dir)
+
+    # move everything else to Albums/, so we end up with two top-level folders
+    everything_except_photos_dir = set(glob(f"{rootdir}/*/")) - set([photos_dir])
+
+    _restructure_if_needed(everything_except_photos_dir, f"{rootdir}/Albums")
 
 
 def main(rootdir):
@@ -109,7 +112,7 @@ def main(rootdir):
     # Takeout/Google Foto
     # rootdir refers to that subfolder
 
-    rootdir = glob(f"{rootdir}/Google*/")[0]
+    rootdir = glob(f"{rootdir}/Google*/")[0].rstrip('/')
     restructure_folders_if_needed(rootdir)
 
     process_albums(rootdir)
